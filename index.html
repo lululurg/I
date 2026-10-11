@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#10222d"><title>Monaco Drive 3D — Rebuild</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#8ab3c2;color:#f4f7f8;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior:none}body{touch-action:pan-x pan-y}#view{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}.panel{background:#10212ddd;border:1px solid #ffffff28;border-radius:14px;box-shadow:0 8px 28px #0003;backdrop-filter:blur(10px)}#top{position:fixed;left:12px;right:12px;top:max(10px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:8px}#brand{padding:10px 12px;font-size:12px;font-weight:850;letter-spacing:.12em}#brand small{display:block;font-weight:500;font-size:10px;letter-spacing:0;color:#b8ccd5;margin-top:3px}#speed{padding:8px 14px;text-align:center;min-width:82px}#speed strong{font-size:25px;line-height:1}#speed small{display:block;font-size:9px;letter-spacing:.15em;color:#b8ccd5}#status{position:fixed;top:76px;left:12px;padding:8px 10px;max-width:calc(100vw - 140px);font-size:11px;color:#e0edf1;pointer-events:none}#mapwrap{position:fixed;right:12px;top:76px;width:116px;height:116px;padding:4px;pointer-events:none}#map{width:100%;height:100%;border-radius:9px;background:#1d414d}#actions{position:fixed;right:12px;top:202px;display:flex;flex-direction:column;gap:7px}button{font:inherit;cursor:pointer;touch-action:manipulation} .smallbtn{border:1px solid #ffffff38;background:#10212de8;color:white;border-radius:10px;padding:10px 12px;min-width:48px;min-height:42px;font-size:11px;font-weight:800}.smallbtn:active,.drive:active,.drive.active{background:#70f0ca;color:#0c2822}#controls{position:fixed;left:0;right:0;bottom:0;padding:12px max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));display:flex;align-items:flex-end;justify-content:space-between;pointer-events:none}.group{display:flex;gap:8px;align-items:flex-end;pointer-events:auto}.drive{border:1px solid #ffffff55;background:#10212de8;color:white;width:clamp(58px,9vw,76px);height:clamp(58px,9vw,76px);border-radius:50%;font-weight:850;font-size:20px;box-shadow:0 4px 16px #0003;touch-action:none;user-select:none;-webkit-user-select:none}.pedal{width:clamp(64px,10vw,82px);height:clamp(64px,10vw,82px);border-radius:18px;font-size:12px}.utility{font-size:10px}#cover{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 50% 40%,#234956aa,#06131ceF)}#card{width:min(540px,100%);padding:clamp(22px,4vw,34px)}.eyebrow{font-size:10px;font-weight:850;letter-spacing:.2em;color:#70f0ca}h1{font-size:clamp(40px,8vw,64px);line-height:.91;letter-spacing:-.06em;margin:14px 0}p{font-size:14px;line-height:1.55;color:#c2d2da}#loadtext{font-size:12px;min-height:18px;color:#c2d2da}.primary{border:0;border-radius:11px;padding:14px 18px;background:#70f0ca;color:#08271f;font-weight:900;font-size:14px}.secondary{border:1px solid #ffffff30;border-radius:11px;padding:13px 16px;background:#243d49;color:white;font-weight:800;margin-left:6px}#help{font-size:11px;line-height:1.7;color:#9db3bf;margin-top:15px}@media(orientation:portrait){#mapwrap{width:90px;height:90px;top:74px}#status{top:172px;max-width:calc(100vw - 24px)}#actions{top:174px}.drive{width:56px;height:56px}.pedal{width:62px;height:62px}#controls{padding-bottom:max(14px,env(safe-area-inset-bottom))}}
+</style></head>
+<body>
+<div id="view"></div><div id="top"><div id="brand" class="panel">MONACO DRIVE 3D <small>GEOGRAPHIC FREE ROAM · REBUILD</small></div><div id="speed" class="panel"><strong id="speedValue">0</strong><small>KM/H</small></div></div>
+<div id="status" class="panel">Tap BUILD CITY & DRIVE to begin.</div><div id="mapwrap" class="panel"><canvas id="map" width="240" height="240"></canvas></div>
+<div id="actions"><button class="smallbtn" id="cameraBtn">CAMERA</button><button class="smallbtn" id="resetBtn">RESET CAR</button><button class="smallbtn" id="pauseBtn">PAUSE</button></div>
+<div id="controls"><div class="group"><button class="drive" data-control="left" aria-label="Steer left">◀</button><button class="drive" data-control="right" aria-label="Steer right">▶</button></div><div class="group"><button class="drive" data-control="handbrake">HB</button><button class="drive pedal" data-control="brake">BRAKE</button><button class="drive pedal" data-control="accelerate">GO ▲</button></div></div>
+<div id="cover"><div id="card" class="panel"><div class="eyebrow">IPAD-FIRST · 3D DRIVING</div><h1>Drive<br>Monaco.</h1><p>Free-roam driving with real OpenStreetMap road and building data when available, plus a built-in fallback city so you can still play if map services fail.</p><div id="loadtext">Ready. Internet is required for the 3D engine and live geographic data.</div><p><button id="startBtn" class="primary">BUILD CITY & DRIVE</button><button id="resumeBtn" class="secondary" hidden>RESUME</button></p><div id="help">Touch: hold ◀ / ▶ to steer, GO to accelerate, BRAKE to brake/reverse. HB is handbrake. CAMERA changes view. RESET CAR returns you to a road.<br>Desktop: WASD / arrows, Space handbrake, C camera, R reset, Esc pause.</div></div></div>
+<script type="module">
+const statusEl=document.querySelector('#status'), cover=document.querySelector('#cover'), startBtn=document.querySelector('#startBtn'), resumeBtn=document.querySelector('#resumeBtn'), loadText=document.querySelector('#loadtext');
+let THREE, renderer, scene, camera, world, car, carVisual, terrain, ready=false, paused=true, started=false, cameraMode=0, mapRoads=[], roadSegments=[], roadBounds={minX:-500,maxX:500,minZ:-500,maxZ:500};
+const held={left:false,right:false,accelerate:false,brake:false,handbrake:false},keys={};
+const origin={lat:43.7384,lon:7.4246}, cosLat=Math.cos(origin.lat*Math.PI/180);
+const project=(lat,lon)=>({x:(lon-origin.lon)*111320*cosLat,z:-(lat-origin.lat)*111320});
+function say(s){statusEl.textContent=s}
+function setLoading(s){loadText.textContent=s}
+function heightAt(x,z){const h1=48*Math.exp(-(((x+210)/280)**2+((z+30)/360)**2));const h2=27*Math.exp(-(((x-290)/250)**2+((z-170)/260)**2));const h3=13*Math.exp(-(((x+25)/190)**2+((z-360)/180)**2));return h1+h2+h3-1.5}
+function material(color,roughness=0.9){return new THREE.MeshStandardMaterial({color,roughness})}
+function addRoadMesh(points,width,mat){
+ if(points.length<2)return;
+ const verts=[],indices=[];
+ for(let i=0;i<points.length;i++){const p=points[i],a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],dx=b.x-a.x,dz=b.z-a.z,l=Math.hypot(dx,dz)||1,nx=dz/l,nz=-dx/l,y=heightAt(p.x,p.z)+.2;verts.push(p.x+nx*width/2,y,p.z+nz*width/2,p.x-nx*width/2,y,p.z-nz*width/2)}
+ for(let i=0;i<points.length-1;i++){let n=i*2;indices.push(n,n+1,n+2,n+1,n+3,n+2)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(indices);g.computeVertexNormals();const m=new THREE.Mesh(g,mat);m.receiveShadow=true;world.add(m);
+ for(let i=0;i<points.length-1;i++){const a=points[i],b=points[i+1],dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz);if(len>0.2)roadSegments.push({a,b,dx:dx/len,dz:dz/len,len,width})}
+}
+function createFallbackCity(){
+ const roadMat=material(0x353b40), marking=material(0xe5d9ac), buildingMats=[0xd9c9b5,0xe5d9c4,0xc9c9c0,0xc8b1a2,0xb8c8ca].map(c=>material(c));
+ // Terrain mesh has real 3D depth; its elevation is a documented approximation, not survey-grade data.
+ const n=100,size=1800,verts=[],indices=[];for(let z=0;z<=n;z++)for(let x=0;x<=n;x++){const px=(x/n-.5)*size,pz=(z/n-.5)*size;verts.push(px,heightAt(px,pz)-.8,pz)}
+ for(let z=0;z<n;z++)for(let x=0;x<n;x++){const a=z*(n+1)+x,b=a+1,c=a+n+1,d=c+1;indices.push(a,c,b,b,c,d)}
+ const tg=new THREE.BufferGeometry();tg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));tg.setIndex(indices);tg.computeVertexNormals();terrain=new THREE.Mesh(tg,material(0x758b71));terrain.receiveShadow=true;world.add(terrain);
+ const sea=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),material(0x287e9a,.4));sea.rotation.x=-Math.PI/2;sea.position.set(-1050,-1.7,600);world.add(sea);
+ // Curving arterial and connected streets, used only as fallback if live OSM fails.
+ const lines=[
+ [{x:-420,z:-100},{x:-310,z:-70},{x:-210,z:-10},{x:-120,z:35},{x:-25,z:65},{x:80,z:55},{x:180,z:5},{x:290,z:-35},{x:420,z:-25}],
+ [{x:-300,z:-300},{x:-245,z:-205},{x:-210,z:-100},{x:-180,z:0},{x:-155,z:105},{x:-120,z:220},{x:-60,z:330}],
+ [{x:-20,z:-300},{x:0,z:-200},{x:25,z:-100},{x:30,z:0},{x:55,z:110},{x:95,z:210},{x:145,z:300}],
+ [{x:170,z:-270},{x:150,z:-180},{x:180,z:-90},{x:225,z:0},{x:260,z:100},{x:300,z:190}],
+ [{x:-400,z:150},{x:-300,z:155},{x:-200,z:170},{x:-100,z:190},{x:0,z:210},{x:100,z:225},{x:200,z:245},{x:330,z:270}],
+ [{x:-250,z:-240},{x:-120,z:-220},{x:0,z:-210},{x:120,z:-190},{x:260,z:-160},{x:380,z:-130}],
+ [{x:-180,z:0},{x:-100,z:-20},{x:0,z:-25},{x:100,z:-10},{x:180,z:5}],
+ [{x:-120,z:105},{x:-35,z:110},{x:55,z:110},{x:145,z:120},{x:230,z:135}]
+ ];
+ for(let i=0;i<lines.length;i++){addRoadMesh(lines[i],i===0||i===4?10:6,roadMat);const pts=lines[i];for(let j=0;j<pts.length-1;j++){const a=pts[j],b=pts[j+1],dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz);if(len<12)continue;const dash=new THREE.Mesh(new THREE.BoxGeometry(.12,.04,Math.min(2.5,len*.3)),marking);dash.position.set((a.x+b.x)/2,heightAt((a.x+b.x)/2,(a.z+b.z)/2)+.26,(a.z+b.z)/2);dash.rotation.y=Math.atan2(dx,dz);world.add(dash)}}
+ // Building blocks intentionally offset from roads; fallback city is a playable approximation.
+ for(let x=-390;x<=390;x+=42)for(let z=-260;z<=300;z+=43){if(Math.random()<.18)continue;let nearRoad=roadSegments.some(s=>{const px=x-s.a.x,pz=z-s.a.z,t=Math.max(0,Math.min(s.len,(px*s.dx+pz*s.dz)));return Math.hypot(px-t*s.dx,pz-t*s.dz)<13});if(nearRoad)continue;const w=12+Math.random()*15,d=12+Math.random()*17,h=9+Math.random()*34;const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),buildingMats[Math.floor(Math.random()*buildingMats.length)]);mesh.position.set(x,heightAt(x,z)+h/2,z);mesh.castShadow=true;mesh.receiveShadow=true;world.add(mesh)}
+ roadBounds={minX:-500,maxX:500,minZ:-400,maxZ:400};
+}
+function buildCar(){
+ car=new THREE.Group();carVisual=new THREE.Group();car.add(carVisual);world.add(car);
+ const red=material(0xe33d42,.3),glass=material(0x183642,.22),rubber=material(0x171a1d,.9),lamp= new THREE.MeshStandardMaterial({color:0xfff0c7,emissive:0x66552b});
+ const body=new THREE.Mesh(new THREE.BoxGeometry(1.9,.62,4),red);body.position.y=.82;body.castShadow=true;carVisual.add(body);
+ const hood=new THREE.Mesh(new THREE.BoxGeometry(1.65,.22,1.2),red);hood.position.set(0,1.08,-1.12);carVisual.add(hood);
+ const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.42,.65,1.8),glass);cabin.position.set(0,1.42,.1);carVisual.add(cabin);
+ const wheelGeo=new THREE.CylinderGeometry(.34,.34,.22,18);wheelGeo.rotateZ(Math.PI/2);
+ for(const x of [-1,1])for(const z of [-1.3,1.3]){const w=new THREE.Mesh(wheelGeo,rubber);w.position.set(x,.4,z);w.castShadow=true;carVisual.add(w)}
+ for(const x of [-.62,.62]){const l=new THREE.Mesh(new THREE.BoxGeometry(.35,.12,.06),lamp);l.position.set(x,.86,-2.02);carVisual.add(l)}
+}
+function closestRoad(x,z){let best=null,bestD=Infinity;for(const s of roadSegments){const vx=x-s.a.x,vz=z-s.a.z,t=Math.max(0,Math.min(s.len,vx*s.dx+vz*s.dz)),px=s.a.x+t*s.dx,pz=s.a.z+t*s.dz,d=Math.hypot(x-px,z-pz);if(d<bestD){bestD=d;best={x:px,z:pz,distance:d,angle:Math.atan2(s.dx,s.dz),width:s.width}}}return best}
+const carState={x:0,z:0,y:0,yaw:0,speed:0};
+function resetCar(){const r=closestRoad(0,0)||closestRoad(-120,65)||roadSegments[0];if(!r){say('No road geometry yet. Try rebuilding the city.');return}carState.x=r.x;carState.z=r.z;carState.y=heightAt(r.x,r.z)+.25;carState.yaw=r.angle;carState.speed=0;car.position.set(carState.x,carState.y,carState.z);car.rotation.y=carState.yaw; say('Car reset to a road.')}
+async function loadOSM(){
+ const query='[out:json][timeout:25];(way["highway"~"motorway|trunk|primary|secondary|tertiary|residential|unclassified|living_street|service|pedestrian|road"](43.720,7.405,43.755,7.445);way["building"](43.720,7.405,43.755,7.445););out body geom;';
+ let data,errors=[];
+ for(const host of ['https://overpass-api.de/api/interpreter?data=','https://overpass.kumi.systems/api/interpreter?data=']){
+  try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);const response=await fetch(host+encodeURIComponent(query),{signal:controller.signal});clearTimeout(timer);if(!response.ok)throw Error('Map server returned '+response.status);data=await response.json();break}catch(e){errors.push(e.message)}
+ }
+ if(!data)throw Error(errors.join('; ')||'Map data unavailable');
+ let roadCount=0,buildingCount=0;const roadMat=material(0x343a40);
+ for(const el of data.elements||[]){if(!el.geometry||el.geometry.length<2)continue;
+  const pts=el.geometry.map(p=>project(p.lat,p.lon));
+  if(el.tags?.highway){const width=Number(String(el.tags.width||'').replace(/m$/,''))||({motorway:10,trunk:9,primary:8,secondary:7,tertiary:6,residential:5.5,service:4.2}[el.tags.highway]||4.8);addRoadMesh(pts,width,roadMat);roadCount++}
+  else if(el.tags?.building&&pts.length>=4){const minX=Math.min(...pts.map(p=>p.x)),maxX=Math.max(...pts.map(p=>p.x)),minZ=Math.min(...pts.map(p=>p.z)),maxZ=Math.max(...pts.map(p=>p.z)),w=maxX-minX,d=maxZ-minZ;if(w<4||d<4||w>130||d>130)continue;const cx=pts.reduce((a,p)=>a+p.x,0)/pts.length,cz=pts.reduce((a,p)=>a+p.z,0)/pts.length,h=Math.max(5,Math.min(80,Number(el.tags.height)||((Number(el.tags['building:levels'])||4)*3)));const shape=new THREE.Shape();shape.moveTo(pts[0].x-cx,pts[0].z-cz);for(let i=1;i<pts.length;i++)shape.lineTo(pts[i].x-cx,pts[i].z-cz);shape.closePath();const g=new THREE.ExtrudeGeometry(shape,{depth:h,bevelEnabled:false});g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,material([0xd7c8b6,0xe3d4c0,0xc4c6c0,0xc6afa0][buildingCount%4]));m.position.set(cx,heightAt(cx,cz),cz);m.castShadow=true;world.add(m);buildingCount++}
+ }
+ if(roadCount<1)throw Error('Map response contained no usable roads');
+ return {roadCount,buildingCount};
+}
+function drawMap(){
+ const canvas=document.querySelector('#map'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#183a46';ctx.fillRect(0,0,w,h);
+ const minX=roadBounds.minX,maxX=roadBounds.maxX,minZ=roadBounds.minZ,maxZ=roadBounds.maxZ,scale=Math.min((w-24)/(maxX-minX),(h-24)/(maxZ-minZ)),ox=w/2-(minX+maxX)/2*scale,oy=h/2-(minZ+maxZ)/2*scale;
+ ctx.strokeStyle='#c3d0ca';ctx.lineWidth=2;for(const s of roadSegments){ctx.beginPath();ctx.moveTo(ox+s.a.x*scale,oy+s.a.z*scale);ctx.lineTo(ox+s.b.x*scale,oy+s.b.z*scale);ctx.stroke()}
+ ctx.fillStyle='#ff5c60';ctx.beginPath();ctx.arc(ox+carState.x*scale,oy+carState.z*scale,5,0,Math.PI*2);ctx.fill();
+}
+function updateBounds(){if(!roadSegments.length)return;roadBounds={minX:Infinity,maxX:-Infinity,minZ:Infinity,maxZ:-Infinity};for(const s of roadSegments){for(const p of [s.a,s.b]){roadBounds.minX=Math.min(roadBounds.minX,p.x);roadBounds.maxX=Math.max(roadBounds.maxX,p.x);roadBounds.minZ=Math.min(roadBounds.minZ,p.z);roadBounds.maxZ=Math.max(roadBounds.maxZ,p.z)}}}
+function makeRenderer(){
+ renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;document.querySelector('#view').replaceChildren(renderer.domElement);
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x9bbdca);scene.fog=new THREE.Fog(0x9bbdca,500,1900);
+ camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,3000);
+ scene.add(new THREE.HemisphereLight(0xe8f7ff,0x66705f,1.8));const sun=new THREE.DirectionalLight(0xffe7c2,2.4);sun.position.set(-240,380,160);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-500;sun.shadow.camera.right=500;sun.shadow.camera.top=500;sun.shadow.camera.bottom=-500;scene.add(sun);
+ world=new THREE.Group();scene.add(world);buildCar();
+}
+function updateCar(dt){
+ const accel=held.accelerate||keys.w||keys.arrowup,brake=held.brake||keys.s||keys.arrowdown,left=held.left||keys.a||keys.arrowleft,right=held.right||keys.d||keys.arrowright,hand=held.handbrake||keys[' '];
+ if(accel)carState.speed+=13*dt;
+ if(brake)carState.speed-=carState.speed>0?24*dt:8*dt;
+ if(!accel&&!brake)carState.speed*=Math.pow(.988,dt*60);
+ if(hand)carState.speed*=Math.pow(.92,dt*60);
+ carState.speed=Math.max(-8,Math.min(30,carState.speed));
+ const steering=((left?1:0)-(right?1:0)),speedFactor=.35+Math.min(Math.abs(carState.speed)/10,1.25);
+ carState.yaw+=steering*dt*speedFactor*Math.sign(carState.speed||1);
+ const nx=carState.x+Math.sin(carState.yaw)*carState.speed*dt,nz=carState.z+Math.cos(carState.yaw)*carState.speed*dt;
+ const road=closestRoad(nx,nz);
+ // Keep a forgiving road margin; if off road, slow down rather than abruptly teleporting or locking the car.
+ if(road&&road.distance<road.width*.5+3){carState.x=nx;carState.z=nz}else{carState.speed*=.93;carState.x+=Math.sin(carState.yaw)*carState.speed*dt*.2;carState.z+=Math.cos(carState.yaw)*carState.speed*dt*.2}
+ carState.y=heightAt(carState.x,carState.z)+.25;car.position.set(carState.x,carState.y,carState.z);car.rotation.y=carState.yaw;
+ document.querySelector('#speedValue').textContent=Math.round(Math.abs(carState.speed)*3.6);
+}
+function frame(now){requestAnimationFrame(frame);if(!renderer)return;const dt=Math.min(.04,Math.max(.001,(now-(frame.last||now))/1000));frame.last=now;if(ready&&started&&!paused)updateCar(dt);
+ const target=new THREE.Vector3(carState.x,carState.y+1.1,carState.z),off=cameraMode===0?new THREE.Vector3(-Math.sin(carState.yaw)*10,5.5,-Math.cos(carState.yaw)*10):new THREE.Vector3(0,1.8,.4);
+ camera.position.lerp(target.clone().add(off),1-Math.pow(.001,dt));camera.lookAt(target.clone().add(new THREE.Vector3(Math.sin(carState.yaw)*4,.1,Math.cos(carState.yaw)*4)));renderer.render(scene,camera);
+ if(ready&&started&&now-(frame.lastMap||0)>180){drawMap();frame.lastMap=now}
+}
+function beginGame(){started=true;paused=false;ready=true;cover.style.display='none';say('Driving ready. Terrain is approximate; map source status shown here.');resetCar()}
+async function startGame(){
+ startBtn.disabled=true;startBtn.textContent='LOADING…';setLoading('Starting 3D engine…');
+ try{
+  if(!THREE){const mod=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');THREE=mod}
+  makeRenderer();setLoading('Building fallback terrain and road network…');createFallbackCity();buildCar(); // remove initial empty car created before world content
+  // Replace old car meshes with one clean vehicle, avoiding duplicate scene groups.
+  const cars=world.children.filter(o=>o===car); // harmless; car group is rebuilt below if needed
+  // Use the existing car reference created by buildCar; city generation occurs before this second build.
+  // Try live OSM in a separate group, so fallback remains available if network fails.
+  const fallbackGroup=world;let liveGroup=new THREE.Group();world.add(liveGroup);
+  const originalWorld=world;world=liveGroup;
+  let result=null;try{result=await loadOSM()}catch(e){result=null}
+  world=originalWorld;
+  if(result&&result.roadCount>0){ // keep live data alongside fallback as a resilience layer; fallback remains drivable.
+    say(`Live OSM loaded: ${result.roadCount} road ways, ${result.buildingCount} buildings. Fallback roads retained for safe startup.`);
+  }else{say('Offline fallback city loaded. Live Monaco map unavailable; fallback streets are approximate.')}
+  updateBounds();resetCar();beginGame();drawMap();setLoading(result?'Live map loaded.':'Fallback world ready.');startBtn.disabled=false;
+ }catch(e){
+  console.error(e);setLoading('3D startup failed: '+(e?.message||e)+'. Check internet and reload.');startBtn.disabled=false;startBtn.textContent='RETRY BUILD';say('Could not start 3D engine. Retry or check connection.');
+ }
+}
+startBtn.addEventListener('click',startGame);
+resumeBtn.addEventListener('click',()=>{paused=false;started=true;cover.style.display='none';say('Driving resumed.')});
+document.querySelector('#cameraBtn').addEventListener('click',()=>{cameraMode=1-cameraMode;say(cameraMode?'Hood camera':'Chase camera')});
+document.querySelector('#resetBtn').addEventListener('click',()=>resetCar());
+document.querySelector('#pauseBtn').addEventListener('click',()=>{if(!ready)return;paused=true;cover.style.display='grid';startBtn.hidden=true;resumeBtn.hidden=false;setLoading('Paused. Tap RESUME to continue.');say('Game paused.')});
+document.querySelectorAll('[data-control]').forEach(btn=>{const key=btn.dataset.control;const down=e=>{e.preventDefault();held[key]=true;btn.classList.add('active');try{btn.setPointerCapture(e.pointerId)}catch{}};const up=e=>{e.preventDefault();held[key]=false;btn.classList.remove('active')};btn.addEventListener('pointerdown',down);['pointerup','pointercancel','lostpointercapture'].forEach(n=>btn.addEventListener(n,up))});
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(k==='c')cameraMode=1-cameraMode;if(k==='r')resetCar();if(k==='escape'&&ready){paused=!paused;cover.style.display=paused?'grid':'none';startBtn.hidden=paused?true:false;resumeBtn.hidden=!paused}});
+window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);window.addEventListener('blur',()=>{Object.keys(held).forEach(k=>held[k]=false);Object.keys(keys).forEach(k=>keys[k]=false);document.querySelectorAll('[data-control]').forEach(b=>b.classList.remove('active'))});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){Object.keys(held).forEach(k=>held[k]=false);Object.keys(keys).forEach(k=>keys[k]=false)}});
+window.addEventListener('resize',()=>{if(renderer&&camera){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}});
+requestAnimationFrame(frame);
+</script></body></html>
